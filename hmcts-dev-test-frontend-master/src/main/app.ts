@@ -23,6 +23,16 @@ app.use(favicon(path.join(__dirname, '/public/assets/images/favicon.ico')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    const method = req.body._method;
+    delete req.body._method;
+    req.method = method;
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, max-age=0, must-revalidate, no-store');
@@ -37,11 +47,11 @@ glob
 setupDev(app, developmentMode);
 
 // error handler
-app.use((err: HTTPError, req: express.Request, res: express.Response) => {
+app.use((err: HTTPError, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log(err);
   // set locals, only providing error in development
-  res.locals.message = err.message;
+  res.locals.message = err?.message || 'An error occurred';
   res.locals.error = env === 'development' ? err : {};
-  res.status(err.status || 500);
+  res.status(err?.status || 500);
   res.render('error');
 });

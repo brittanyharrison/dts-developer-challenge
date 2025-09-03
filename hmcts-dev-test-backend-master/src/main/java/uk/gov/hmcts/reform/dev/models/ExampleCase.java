@@ -20,3 +20,4 @@ public class ExampleCase {
     private String status;
     private LocalDateTime createdDate;
 }
+
